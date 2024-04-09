@@ -200,7 +200,6 @@ const pkg = getPackageJson();
     // disable npm fund message, because that would break the output
     // -ws/iwr needed for workspaces https://github.com/npm/cli/issues/6099#issuecomment-1961995288
     await runInWorkspace('npm', ['config', 'set', 'fund', 'false', '-ws=false', '-iwr']);
-
     // do it in the current checked out github branch (DETACHED HEAD)
     // important for further usage of the package.json version
     await runInWorkspace('npm', ['version', '--allow-same-version=true', '--git-tag-version=false', current]);
@@ -244,11 +243,15 @@ const pkg = getPackageJson();
       console.warn(e);
     }
 
-    const token = process.env.GH_AUTH_TOKEN !== "" ? process.env.GH_AUTH_TOKEN : process.env.GITHUB_TOKEN;
-    console.log(token);
-    const remoteRepo = `https://${process.env.GITHUB_ACTOR}:${token}@${
-      process.env['INPUT_CUSTOM-GIT-DOMAIN'] || 'github.com'
-    }/${process.env.GITHUB_REPOSITORY}.git`;
+    const token = process.env.GH_PUSH_TOKEN || process.env.GITHUB_TOKEN;
+    
+    if (!token) {
+      exitFailure('No token found. Please set the GH_PUSH_TOKEN or GITHUB_TOKEN secret.');
+      return;
+    }
+
+    const remoteRepo = `https://${process.env.GITHUB_ACTOR}:${token}@${process.env['INPUT_CUSTOM-GIT-DOMAIN'] || 'github.com'}/${process.env.GITHUB_REPOSITORY}.git`;
+
     if (process.env['INPUT_SKIP-TAG'] !== 'true') {
       await runInWorkspace('git', ['tag', newVersion]);
       if (process.env['INPUT_SKIP-PUSH'] !== 'true') {
