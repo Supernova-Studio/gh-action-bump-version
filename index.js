@@ -244,12 +244,6 @@ const pkg = getPackageJson();
     }
 
     const token = process.env.GH_PUSH_TOKEN || process.env.GITHUB_TOKEN;
-    
-    if (!token) {
-      exitFailure('No token found. Please set the GH_PUSH_TOKEN or GITHUB_TOKEN secret.');
-      return;
-    }
-
     const remoteRepo = `https://${process.env.GITHUB_ACTOR}:${token}@${process.env['INPUT_CUSTOM-GIT-DOMAIN'] || 'github.com'}/${process.env.GITHUB_REPOSITORY}.git`;
 
     if (process.env['INPUT_SKIP-TAG'] !== 'true') {
